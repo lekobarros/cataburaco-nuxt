@@ -41,6 +41,8 @@ export default {
     'bootstrap-vue/nuxt',
     // https://go.nuxtjs.dev/pwa
     '@nuxtjs/pwa',
+    // https://www.npmjs.com/package/@nuxtjs/dayjs
+    '@nuxtjs/dayjs'
   ],
 
   // PWA module configuration: https://go.nuxtjs.dev/pwa

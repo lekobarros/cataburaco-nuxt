@@ -9,7 +9,8 @@ export const actions = {
 }
 
 export const mutations = {
-  updateListEvent (state, payload) {
-    state.listEvents = [state.listEvents, payload];
+  updateListEvents (state, payload) {
+    const { listEvents } = state;
+    state.listEvents = [payload]
   }
 }

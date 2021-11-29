@@ -4,31 +4,23 @@
       <b-row class="px-3" cols="1">
         <b-form @submit.prevent="onDispatch">
           <h2>Adicionar Evento</h2>
-          <p>Hello</p>
+          <p>Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et</p>
 
           <!-- Field Address -->
-          <b-form-group id="input-adress" label="Endereço:" label-for="input-adress">
-            <b-form-input id="input-adress" type="text" placeholder="(Requerido)" v-model="form.address.address" />
+          <b-form-group id="input-adress" label="Nome do Buraco:" label-for="input-adress">
+            <b-form-input id="input-adress" type="text" placeholder="Descreva a localização" v-model="form.name" />
             <!-- <b-form-invalid-feedback>
               {{ isValideAddress }}
             </b-form-invalid-feedback> -->
           </b-form-group>
           <!-- / Field Address -->
 
-          <!-- BAIRRO E ETC ? -->
-
-          <!-- Field Number -->
-          <b-form-group id="input-address-number" label="Número:" label-for="input-address-number">
-            <b-form-input id="input-address-number" placeholder="(Requerido)" v-model="form.address.number" />
-          </b-form-group>
-          <!-- / Field Number -->
-
           <!-- Field Observation -->
           <b-form-group id="input-address-number" label="Observação:" label-for="input-address-number">
-            <b-form-textarea id="textarea" v-model="form.observation" placeholder="Observação" rows="6" max-rows="12" />
+            <b-form-textarea id="textarea" v-model="form.observation" placeholder="Observação sobre a localização do buraco. (Opcional)" rows="6" max-rows="12" />
           </b-form-group>
 
-          <b-button variant="dark" block>Anexar Mídia</b-button>
+          <!-- <b-button variant="dark" block>Anexar Mídia</b-button> -->
           <b-button variant="primary" block type="submit" @click="onDispatch">Enviar</b-button>
         </b-form>
       </b-row>
@@ -36,11 +28,10 @@
 
     <b-button v-b-modal.modal-1>Launch demo modal</b-button>
 
-    {{ listEvents }}
-
     <!-- Modal -->
     <b-modal id="modal-1" title="Informação" centered>
       <h2>Evento Adicionado</h2>
+
       <p>
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eget ligula eu lectus lobortis condimentum.
         Aliquam nonummy auctor massa. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac
@@ -48,8 +39,8 @@
         felis ut adipiscing.
       </p>
 
-      <p>Id: 312321321323</p>
-      <p>Data e Horário: 312321321323</p>
+      <p>ID: {{ currentEvent.hash }}</p>
+      <p>Data e Horário: {{ $dayjs(currentEvent.date).format('DD/MM/YYYY') }}</p>
 
       <b-button variant="primary" block>Compartilhar</b-button>
       <b-button variant="primary" block>Voltar ao início</b-button>
@@ -71,6 +62,7 @@ export default {
   data() {
     return {
       form: {
+        name: null,
         address: {
           address: null,
           number: null,
@@ -78,6 +70,7 @@ export default {
         observation: null,
         submitted: false,
       },
+      currentEvent: false,
       dispatch: {
         error: false,
         dispatched: false,
@@ -87,13 +80,8 @@ export default {
 
   validations: {
     form: {
-      address: {
-        address: {
-          required,
-        },
-        number: {
-          required,
-        },
+      name: {
+        required,
       },
     },
   },
@@ -114,8 +102,9 @@ export default {
   },
 
   methods: {
+    doRandNumeber: function () {},
     doResetForm: function () {
-      const form =  {
+      const form = {
         address: {
           address: null,
           number: null,
@@ -127,7 +116,7 @@ export default {
       this.form = form;
     },
 
-    onDispatch: function () {
+    onDispatch: async function () {
       if (this.dispatch.dispatched) return;
 
       // Validate the form
@@ -139,27 +128,42 @@ export default {
       if (this.$v.form.$invalid) return;
       else this.dispatch.dispatched = true;
 
-  console.log('ok')
       try {
-        const { address } = this.form;
-        const payload = { address };
+        const isAvaibleLocalization = window.navigator.geolocation;
 
-        this.$store.commit('global/updateListEvent', payload);
+        // If isn't avaible geolozalization
+        if (!isAvaibleLocalization) throw new Error('API Geolocalização indisponivel');
+
+        // gerar um código numerico, a data, hora e a coordenada geográfica do local onde o denunciante visualizou o “evento”;
+        // const {
+        //   coords: { latitude, longitude },
+        // } = window.navigator.geolocation.getCurrentPosition();
+        // const geo = { latitude, longitude };
+        // const geo = await window.navigator.geolocation.getCurrentPosition(({ coords }) => coords);
+        // console.log(geo);
+
+        // Get const information
+        const hash = '984798374878923948324'; // ! Fn
+        const date = this.$dayjs().valueOf();
+        const { name, observation } = this.form;
+
+        // Create the payload
+        let payload = { hash, date, name };
+        if (observation) payload = { ...payload, observation };
+
+        // Commit on store
+        this.$store.commit('global/updateListEvents', payload);
+        this.currentEvent = payload;
 
         // Reset Form
         this.doResetForm();
 
         // abrir o modal
       } catch (err) {
+        // show alert
         console.log(err);
       }
     },
   },
 };
 </script>
-
-<style>
-.css {
-  background: red;
-}
-</style>
