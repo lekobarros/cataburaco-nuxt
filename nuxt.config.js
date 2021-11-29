@@ -52,7 +52,18 @@ export default {
     }
   },
 
+  // 
+  dayjs: {
+    locales: ['pt-br'],
+    defaultLocale: 'pt-br',
+    defaultTimeZone: 'America/Sao_Paulo',
+    plugins: [
+      'utc',
+      'timezone'
+    ]
+  },
+
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
+    }
   }
-}

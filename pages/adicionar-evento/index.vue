@@ -26,10 +26,8 @@
       </b-row>
     </b-container>
 
-    <b-button v-b-modal.modal-1>Launch demo modal</b-button>
-
     <!-- Modal -->
-    <b-modal id="modal-1" title="Informação" centered>
+    <b-modal ref="modalRefs" id="modal-1" title="Informação" centered>
       <h2>Evento Adicionado</h2>
 
       <p>
@@ -40,7 +38,7 @@
       </p>
 
       <p>ID: {{ currentEvent.hash }}</p>
-      <p>Data e Horário: {{ $dayjs(currentEvent.date).format('DD/MM/YYYY') }}</p>
+      <p>Data e Horário: {{ $dayjs(currentEvent.date).format('HH:mm:ss - DD/MM/YYYY') }}</p>
 
       <b-button variant="primary" block>Compartilhar</b-button>
       <b-button variant="primary" block>Voltar ao início</b-button>
@@ -52,6 +50,13 @@
 import _ from 'lodash';
 import { mapState } from 'vuex';
 import { required } from 'vuelidate/lib/validators';
+
+// substituri o lorem impusion
+// falta adicionar localizacao
+// validacao dos inputs
+// anexo documentos
+// gerar a hash de id unico
+// bug do store
 
 export default {
   head: function () {
@@ -144,7 +149,7 @@ export default {
 
         // Get const information
         const hash = '984798374878923948324'; // ! Fn
-        const date = this.$dayjs().valueOf();
+        const date = this.$dayjs().tz("America/Sao_Paulo").valueOf();
         const { name, observation } = this.form;
 
         // Create the payload
@@ -154,6 +159,9 @@ export default {
         // Commit on store
         this.$store.commit('global/updateListEvents', payload);
         this.currentEvent = payload;
+
+        // 
+        this.$refs['modalRefs'].show()
 
         // Reset Form
         this.doResetForm();
