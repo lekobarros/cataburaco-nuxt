@@ -11,6 +11,6 @@ export const actions = {
 export const mutations = {
   updateListEvents (state, payload) {
     const { listEvents } = state;
-    state.listEvents = [payload]
+    state.listEvents = [...listEvents, payload]
   }
 }

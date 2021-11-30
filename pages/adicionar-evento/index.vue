@@ -1,5 +1,5 @@
 <template>
-  <div class="mt-4">
+  <div>
     <b-container>
       <b-row class="px-3" cols="1">
         <b-form @submit.prevent="onDispatch">
@@ -17,7 +17,13 @@
 
           <!-- Field Observation -->
           <b-form-group id="input-address-number" label="Observação:" label-for="input-address-number">
-            <b-form-textarea id="textarea" v-model="form.observation" placeholder="Observação sobre a localização do buraco. (Opcional)" rows="6" max-rows="12" />
+            <b-form-textarea
+              id="textarea"
+              v-model="form.observation"
+              placeholder="Observação sobre a localização do buraco. (Opcional)"
+              rows="6"
+              max-rows="12"
+            />
           </b-form-group>
 
           <!-- <b-button variant="dark" block>Anexar Mídia</b-button> -->
@@ -28,35 +34,40 @@
 
     <!-- Modal -->
     <b-modal ref="modalRefs" id="modal-1" title="Informação" centered>
-      <h2>Evento Adicionado</h2>
+      <b-container fluid>
+        <h2>Evento Adicionado</h2>
 
-      <p>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eget ligula eu lectus lobortis condimentum.
-        Aliquam nonummy auctor massa. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac
-        turpis egestas. Nulla at risus. Quisque purus magna, auctor et, sagittis ac, posuere eu, lectus. Nam mattis,
-        felis ut adipiscing.
-      </p>
+        <p>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eget ligula eu lectus lobortis condimentum.
+          Aliquam nonummy auctor massa. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac
+          turpis egestas. Nulla at risus. Quisque purus magna, auctor et, sagittis ac, posuere eu, lectus. Nam mattis,
+          felis ut adipiscing.
+        </p>
 
-      <p>ID: {{ currentEvent.hash }}</p>
-      <p>Data e Horário: {{ $dayjs(currentEvent.date).format('HH:mm:ss - DD/MM/YYYY') }}</p>
+        <p>ID: {{ currentEvent.id }}</p>
+        <p>Data e Horário: {{ $dayjs(currentEvent.date).format('HH:mm:ss - DD/MM/YYYY') }}</p>
 
-      <b-button variant="primary" block>Compartilhar</b-button>
-      <b-button variant="primary" block>Voltar ao início</b-button>
+        <b-button variant="primary" block to="/lista-de-eventos">Lista de Eventos</b-button>
+        <b-button variant="primary" block to="/">Voltar ao início</b-button>
+      </b-container>
+      <template #modal-footer> <div></div> </template>
     </b-modal>
+
+    <!-- Notifications -->
+    <notifications group="notifications" position="top right" />
   </div>
 </template>
 
 <script>
 import _ from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
+
 import { mapState } from 'vuex';
 import { required } from 'vuelidate/lib/validators';
 
 // substituri o lorem impusion
-// falta adicionar localizacao
 // validacao dos inputs
 // anexo documentos
-// gerar a hash de id unico
-// bug do store
 
 export default {
   head: function () {
@@ -120,7 +131,19 @@ export default {
 
       this.form = form;
     },
-
+    getGeolocalization: function () {
+      return new Promise((resolve, reject) => {
+        try {
+          window.navigator.geolocation.getCurrentPosition((position) => {
+            const { latitude, longitude } = position.coords;
+            resolve({ latitude, longitude });
+          });
+        } catch (err) {
+          reject(err);
+        }
+      });
+    },
+    // GET
     onDispatch: async function () {
       if (this.dispatch.dispatched) return;
 
@@ -139,39 +162,64 @@ export default {
         // If isn't avaible geolozalization
         if (!isAvaibleLocalization) throw new Error('API Geolocalização indisponivel');
 
-        // gerar um código numerico, a data, hora e a coordenada geográfica do local onde o denunciante visualizou o “evento”;
-        // const {
-        //   coords: { latitude, longitude },
-        // } = window.navigator.geolocation.getCurrentPosition();
-        // const geo = { latitude, longitude };
-        // const geo = await window.navigator.geolocation.getCurrentPosition(({ coords }) => coords);
-        // console.log(geo);
-
         // Get const information
-        const hash = '984798374878923948324'; // ! Fn
-        const date = this.$dayjs().tz("America/Sao_Paulo").valueOf();
+        const id = uuidv4();
+        const date = this.$dayjs().tz('America/Sao_Paulo').valueOf();
+        const geoPos = await this.getGeolocalization();
         const { name, observation } = this.form;
 
         // Create the payload
-        let payload = { hash, date, name };
+        let payload = { id, date, geoPos, name };
         if (observation) payload = { ...payload, observation };
 
         // Commit on store
         this.$store.commit('global/updateListEvents', payload);
         this.currentEvent = payload;
 
-        // 
-        this.$refs['modalRefs'].show()
+        // Open the modal
+        this.$refs['modalRefs'].show();
 
         // Reset Form
         this.doResetForm();
-
-        // abrir o modal
       } catch (err) {
-        // show alert
-        console.log(err);
+        // Show error with notification
+        this.$notify({
+          group: 'notifications',
+          title: 'Error!',
+          text: err.menssage,
+        });
+      } finally {
+        this.dispatch.dispatched = false;
       }
     },
   },
 };
 </script>
+
+<style lang="scss">
+.vue-notification {
+  padding: 10px;
+  margin: 0 5px 5px;
+
+  font-size: 12px;
+
+  color: #ffffff;
+  background: #44a4fc;
+  border-left: 5px solid #187fe7;
+
+  &.warn {
+    background: #ffb648;
+    border-left-color: #f48a06;
+  }
+
+  &.error {
+    background: #e54d42;
+    border-left-color: #b82e24;
+  }
+
+  &.success {
+    background: #68cd86;
+    border-left-color: #42a85f;
+  }
+}
+</style>
