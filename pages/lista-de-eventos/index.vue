@@ -7,19 +7,9 @@
           <h2 class="mb-4">Lista de Evento</h2>
           <b-container>
             <b-row>
-              <b-col>
+              <b-col class="mb-2" cols="12" v-for="(item, index) in listEvents" :key="index">
                 <!-- v-for -->
-                <b-card
-                  :title="item.name"
-                  img-src="https://picsum.photos/600/300/?image=25"
-                  img-alt="Image"
-                  img-top
-                  tag="article"
-                  style="max-width: 20rem"
-                  class="mb-2 block w-100"
-                  v-for="(item, index) in listEvents"
-                  :key="index"
-                >
+                <b-card :title="item.name" tag="article">
                   <b-card-text v-if="item.observation">
                     {{ item.observation }}
                   </b-card-text>

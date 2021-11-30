@@ -4,7 +4,7 @@
       <b-row class="px-3" cols="1">
         <b-form @submit.prevent="onDispatch">
           <h2>Adicionar Evento</h2>
-          <p>Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et</p>
+          <p>Informe o nome do local onde encontrou o buraco.</p>
 
           <!-- Field Address -->
           <b-form-group id="input-adress" label="Nome do Buraco:" label-for="input-adress">

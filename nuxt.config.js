@@ -23,6 +23,11 @@ export default {
   css: [
   ],
 
+  // Configuration Env https://nuxtjs.org/docs/configuration-glossary/configuration-env/
+  env: {
+    NGROK_AUTHTOKEN: process.env.NGROK_AUTHTOKEN
+  },
+
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [
     '~/plugins/vuelidate.js',
@@ -34,6 +39,7 @@ export default {
 
   // Modules for dev and build (recommended): https://go.nuxtjs.dev/config-modules
   buildModules: [
+    '@nuxtjs/ngrok'
   ],
 
   // Modules: https://go.nuxtjs.dev/config-modules
@@ -62,6 +68,12 @@ export default {
       'utc',
       'timezone'
     ]
+  },
+
+  //
+  ngrok: {
+    // module options
+    authtoken: process.env.NGROK_AUTHTOKEN
   },
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
