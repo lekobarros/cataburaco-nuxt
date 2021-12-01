@@ -25,7 +25,8 @@ export default {
 
   // Configuration Env https://nuxtjs.org/docs/configuration-glossary/configuration-env/
   env: {
-    NGROK_AUTHTOKEN: process.env.NGROK_AUTHTOKEN
+    NGROK_AUTHTOKEN: process.env.NGROK_AUTHTOKEN,
+    ARCGIS_APIKEY: process.env.ARCGIS_APIKEY
   },
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins

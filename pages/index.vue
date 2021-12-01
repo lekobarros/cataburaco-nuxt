@@ -4,177 +4,104 @@
 
 <script>
 import { loadModules } from 'esri-loader';
+import { mapState } from 'vuex';
 
 export default {
+  computed: {
+    ...mapState('global', ['listEvents']),
+  },
   mounted() {
-    console.log('map: mounted');
-    loadModules(
-      [
-        'esri/WebMap',
-        'esri/views/MapView',
-        'esri/widgets/Editor',
-        'esri/widgets/support/SnappingControls',
-        'esri/widgets/Expand',
-      ],
-      {
-        // use a specific version instead of latest 4.x
-        url: 'https://js.arcgis.com/4.21/',
-      }
-    ).then(([WebMap, MapView, Editor, SnappingControls, Expand]) => {
-      // Create a map from the referenced webmap item id
-      const webmap = new WebMap({
-        portalItem: {
-          id: '459a495fc16d4d4caa35e92e895694c8',
-        },
+    loadModules(['esri/config', 'esri/Map', 'esri/views/MapView', 'esri/Graphic', 'esri/layers/GraphicsLayer'], {
+      // use a specific version instead of latest 4.x
+      url: 'https://js.arcgis.com/4.21/',
+    }).then(([esriConfig, Map, MapView, Graphic, GraphicsLayer]) => {
+      esriConfig.apiKey = process.env.ARCGIS_APIKEY
+
+      const map = new Map({
+        basemap: 'arcgis-topographic',
       });
 
       const view = new MapView({
+        map: map,
+        center: [-44.199029, -19.954542],
+        zoom: 16,
         container: 'viewDiv',
-        map: webmap
       });
 
-      view.when(() => {
-        view.map.loadAll().then(() => {
-          view.map.allLayers.forEach((layer) => {
-            if (layer.type === 'feature') {
-              switch (layer.geometryType) {
-                case 'polygon':
-                  polygonLayer = layer;
-                  break;
-                case 'polyline':
-                  lineLayer = layer;
-                  break;
-                case 'point':
-                  pointLayer = layer;
-                  break;
-              }
-            }
-          });
+      const graphicsLayer = new GraphicsLayer();
 
-          // Create layerInfos for layers in Editor. This
-          // sets the fields for editing.
+      map.add(graphicsLayer);
 
-          const pointInfos = {
-            layer: pointLayer,
-            fieldConfig: [
-              {
-                name: 'HazardType',
-                label: 'Hazard type',
-              },
-              {
-                name: 'Description',
-                label: 'Description',
-              },
-              {
-                name: 'SpecialInstructions',
-                label: 'Special Instructions',
-              },
-              {
-                name: 'Status',
-                label: 'Status',
-              },
-              {
-                name: 'Priority',
-                label: 'Priority',
-              },
-            ],
-          };
+      // Push PUC Minas
+      let point = {
+        type: 'point',
+        longitude: -44.199029,
+        latitude: -19.954542,
+      };
 
-          const lineInfos = {
-            layer: lineLayer,
-            fieldConfig: [
-              {
-                name: 'Severity',
-                label: 'Severity',
-              },
-              {
-                name: 'blocktype',
-                label: 'Type of blockage',
-              },
-              {
-                name: 'fullclose',
-                label: 'Full closure',
-              },
-              {
-                name: 'active',
-                label: 'Active',
-              },
-              {
-                name: 'locdesc',
-                label: 'Location Description',
-              },
-            ],
-          };
+      const simpleMarkerSymbol = {
+        type: 'simple-marker',
+        color: [205, 50, 200],
+        outline: {
+          color: [205, 50, 200],
+          width: 10,
+        },
+      };
 
-          const polyInfos = {
-            layer: polygonLayer,
-            fieldConfig: [
-              {
-                name: 'incidenttype',
-                label: 'Incident Type',
-              },
-              {
-                name: 'activeincid',
-                label: 'Active',
-              },
-              {
-                name: 'descrip',
-                label: 'Description',
-              },
-            ],
-          };
+      const popupTemplate = {
+        title: '{Name}',
+        content: '{Description}',
+      };
 
-          const editor = new Editor({
-            view: view,
-            layerInfos: [
-              {
-                layer: pointLayer,
-                fieldConfig: [pointInfos],
-              },
-              {
-                layer: lineLayer,
-                fieldConfig: [lineInfos],
-              },
-              {
-                layer: polygonLayer,
-                fieldConfig: [polyInfos],
-              },
-            ],
-            // It is possible to set snapping via the API by directly setting SnappingOptions in the Editor. This can also be toggled on/off using the CTRL key. By default snapping is not enabled, setting enabled to true toggles this.
-            snappingOptions: {
-              // Autocastable to snapping options
-              enabled: true, // sets the global snapping option that controls both geometry constraints (self-snapping) and feature snapping.
-              featureSources: [
-                {
-                  // Autocastable to FeatureSnappingLayerSource
-                  // Enable feature snapping on specified layer(s)
-                  layer: pointLayer,
-                },
-              ],
-            },
-          });
+      const attributes = {
+        Name: 'PUC Minas',
+        Description: 'Universidade de Betim',
+      };
 
-          // Add the SnappingControls widget to provide a UI for easy toggling of Editor snapping. Associate the SnappingControls widget to the Editor's snappingOptions as seen below. If nothing is set within the Editor, the defaults will display and all layers associated with the map that support snapping display within the snapping layers as disabled.
+      const pointGraphic = new Graphic({
+        geometry: point,
+        symbol: simpleMarkerSymbol,
+        attributes,
+        popupTemplate,
+      });
 
-          const snappingControls = new SnappingControls({
-            label: 'Configure snapping options',
-            view: view,
-            snappingOptions: editor.snappingOptions, // Autocastable to SnappingOptions
-          });
+      graphicsLayer.add(pointGraphic);
 
-          // Create the Expand widget and set its content to that of the SnappingControls
-          const snappingExpand = new Expand({
-            expandIconClass: 'esri-icon-settings2',
-            expandTooltip: 'Show snapping UI',
-            expanded: false,
-            view: view,
-            content: snappingControls,
-          });
+      // map with points
+      this.listEvents.forEach((element) => {
+        const point = {
+          type: 'point',
+          longitude: element.geoPos.longitude,
+          latitude: element.geoPos.latitude,
+        };
 
-          // Add the widgets to top and bottom right of the view
-          view.ui.add(editor, 'top-right');
-          view.ui.add(snappingExpand, 'bottom-right');
+        const simpleMarkerSymbol = {
+          type: 'simple-marker',
+          color: [226, 119, 40],
+          outline: {
+            color: [255, 255, 255],
+            width: 1,
+          },
+        };
+
+        const popupTemplate = {
+          title: '{Name}',
+          content: '{Name} - {Description}',
+        };
+
+        const attributes = {
+          Name: element.name,
+          Description: element.observation ?? 'Sem descrição',
+        };
+
+        const pointGraphic = new Graphic({
+          geometry: point,
+          symbol: simpleMarkerSymbol,
+          attributes,
+          popupTemplate,
         });
+
+        graphicsLayer.add(pointGraphic);
       });
     });
   },
