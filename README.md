@@ -2,7 +2,7 @@
 
 This application was made for a college project to build a sample Progressive Web App with the most currency front-end technologies.
 
-The Application "Cata Buraco" consists of the user reporting the street holes find around on localization for the local government can easily locate for the local government can locate the street holes and adjust them for the population.
+The Application "Cata Buraco" consists of the user reporting the street holes find around on localization for the local government can easily locate the street holes and adjust them for the population.
 
 ## Build Setup
 
@@ -25,7 +25,7 @@ $ npm run generate
 
 For building the application I choose Nuxt.js/Vue.js as a base in the main framework with Bootstrap for the project UI.
 
-The core of the project run with ArcGIS mapview and another API ES6+ to get the current localization from the user.
+The core of the project run with [ArcGIS MapView](https://www.arcgis.com/apps/mapviewer/index.html) and another API ES6+ to get the current localization.
 
 - Vue.js/Nuxt.js, Vuex and Vue Router;
 - Bootstrap for UI
